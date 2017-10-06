@@ -1,0 +1,50 @@
+package frontend
+
+import (
+	"fmt"
+	"net"
+	"net/url"
+	"strings"
+
+	"github.com/gin-gonic/gin"
+)
+
+// Valid redirects the user to a thing to do a thing
+func (i *Impl) Valid(c *gin.Context) {
+	key := "cosign-" + i.Config.CoSign.Service
+	loginCookie, exists := c.GetQuery(key)
+	if !exists {
+		fmt.Println(":(")
+		c.Redirect(307, "https://"+i.Config.CoSign.CGIAddress+"/cosign/validation_error.html")
+		return
+	}
+
+	// loginCookie should be exactly what was passed to the address bar
+	loginCookie = url.QueryEscape(loginCookie)
+
+	// localhost:8080/cosign/valid?cosign-betterinformatics.com=sIDrTIml5hWfK5uu9TAQ8-mdwmif6An81-8vgs2qjzupJ5w4rldrWzyxgsUKNLEY3Ovsjd-doqO9xXdQ421h6dA+k5tiQkhbek79PczciT590awVKvFviT9gQUIY&https://RETURN_ADDRESS_HERE
+	redirect := strings.TrimPrefix(c.Request.URL.RawQuery, key+"="+loginCookie+"&")
+	_, err := url.ParseRequestURI(redirect)
+	if err != nil {
+		c.Redirect(307, "https://"+i.Config.CoSign.CGIAddress+"/cosign/validation_error.html")
+		return
+	}
+
+	host, _, err := net.SplitHostPort(c.Request.Host)
+	if err != nil {
+		fmt.Println("ERROR???")
+		c.Redirect(307, "https://"+i.Config.CoSign.CGIAddress+"/cosign/validation_error.html")
+		return
+	}
+
+	c.SetCookie(
+		key, loginCookie, // set key=value
+		43200, // 12 hour hard timeout period for CoSign
+		"/",   // path
+		host,
+		!i.Config.Insecure,
+		true, // httpOnly, meaning that client js cannot access the cookie
+	)
+
+	c.Redirect(301, redirect)
+}
