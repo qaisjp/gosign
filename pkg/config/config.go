@@ -16,6 +16,7 @@ type Config struct {
 type CoSignConfig struct {
 	DaemonAddress string `required:"true"`
 	CGIAddress    string `required:"true"`
+	ServerName    string `required:"true"`
 	Service       string `required:"true"`
 	KeyFile       string `required:"true"`
 	CertFile      string `required:"true"`

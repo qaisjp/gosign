@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/compsoc-edinburgh/bi-dice-api/pkg/api/backend"
 	"github.com/compsoc-edinburgh/bi-dice-api/pkg/api/base"
 	"github.com/compsoc-edinburgh/bi-dice-api/pkg/api/frontend"
 	"github.com/compsoc-edinburgh/bi-dice-api/pkg/config"
@@ -27,6 +28,9 @@ func NewAPI(
 
 	frontend := frontend.Impl{API: a}
 	router.GET("/cosign/valid", frontend.Valid)
+
+	backend := backend.Impl{API: a}
+	router.GET("/check/:username/:value/:login_cookie", backend.Check)
 
 	return a
 }

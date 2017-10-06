@@ -3,6 +3,7 @@ package frontend
 import (
 	"fmt"
 	"net"
+	"net/http"
 	"net/url"
 	"strings"
 
@@ -15,7 +16,7 @@ func (i *Impl) Valid(c *gin.Context) {
 	loginCookie, exists := c.GetQuery(key)
 	if !exists {
 		fmt.Println(":(")
-		c.Redirect(307, "https://"+i.Config.CoSign.CGIAddress+"/cosign/validation_error.html")
+		c.Redirect(http.StatusPermanentRedirect, "https://"+i.Config.CoSign.CGIAddress+"/cosign/validation_error.html")
 		return
 	}
 
@@ -26,25 +27,24 @@ func (i *Impl) Valid(c *gin.Context) {
 	redirect := strings.TrimPrefix(c.Request.URL.RawQuery, key+"="+loginCookie+"&")
 	_, err := url.ParseRequestURI(redirect)
 	if err != nil {
-		c.Redirect(307, "https://"+i.Config.CoSign.CGIAddress+"/cosign/validation_error.html")
+		c.Redirect(http.StatusPermanentRedirect, "https://"+i.Config.CoSign.CGIAddress+"/cosign/validation_error.html")
 		return
 	}
 
 	host, _, err := net.SplitHostPort(c.Request.Host)
 	if err != nil {
-		fmt.Println("ERROR???")
-		c.Redirect(307, "https://"+i.Config.CoSign.CGIAddress+"/cosign/validation_error.html")
+		c.Redirect(http.StatusPermanentRedirect, "https://"+i.Config.CoSign.CGIAddress+"/cosign/validation_error.html")
 		return
 	}
 
 	c.SetCookie(
 		key, loginCookie, // set key=value
-		43200, // 12 hour hard timeout period for CoSign
-		"/",   // path
-		host,
-		!i.Config.Insecure,
-		true, // httpOnly, meaning that client js cannot access the cookie
+		43200,              // 12 hour hard timeout period for CoSign
+		"/",                // path
+		host,               // hostname
+		!i.Config.Insecure, // limit to secure webpages?
+		true,               // httpOnly, meaning that client js cannot access the cookie
 	)
 
-	c.Redirect(301, redirect)
+	c.Redirect(http.StatusPermanentRedirect, redirect)
 }
