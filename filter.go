@@ -2,7 +2,6 @@ package cosign
 
 import (
 	"crypto/tls"
-	"fmt"
 	"net"
 	"net/textproto"
 	"strings"
@@ -67,23 +66,24 @@ func (f *Filter) dial() (err error) {
 	f.conn = tls.Client(conn, f.config.TLSConfig)
 	f.text = textproto.NewConn(f.conn)
 
-	_, message, err = f.text.ReadResponse(220)
+	code, message, err := f.text.ReadResponse(220)
 	if err != nil {
 		f.text.Close()
+		return errors.Wrapf(err, "expected code 200, got %d %s", code, message)
 	}
-
-	fmt.Println(message)
 
 	defer func() {
 		rerr := recover()
 		if rerr != nil {
 			err = errors.Wrapf(rerr.(error), "noop was unsuccessful... did you provide the right key/crt?")
+			f.text.Close()
 		}
 	}()
 
 	// Make sure the NOOP works
 	_, _, err = f.cmd(250, "NOOP")
 	if err != nil {
+		f.text.Close()
 		return errors.Wrap(err, "noop was unsuccessful")
 	}
 
@@ -94,8 +94,9 @@ func (f *Filter) dial() (err error) {
 func (f *Filter) Quit() error {
 	_, msg, err := f.cmd(221, "QUIT")
 	if err != nil {
-		return err
+		return errors.Wrap(err, "QUIT failed")
 	}
+
 	if msg != "Service closing transmission channel" {
 		return errors.Errorf("unexpected response: %s", msg)
 	}
@@ -108,31 +109,32 @@ func (f *Filter) Close() error {
 }
 
 // Check checks the given login token
-func (f *Filter) Check(loginToken string) (string, error) {
+func (f *Filter) Check(loginToken string) (resp Response, err error) {
 	// Make sure login token is clean
 	if containsWhitespace(loginToken) {
-		return "", errors.New("Malformed login token")
+		err = errors.New("Malformed login token")
+		return
 	}
 
 	code, msg, err := f.cmd(-1, "CHECK cosign-%s=%s", f.config.Service, loginToken)
 	if err != nil {
-		return "", err
+		return
 	}
 
-	fmt.Printf("%s %s", code, msg)
+	// fmt.Printf("%s %s", code, msg)
 
-	if code == 231 {
-		fmt.Println("Success: ", msg)
-		return msg, nil
-	} else if code == 430 {
-		fmt.Println("Failed: logged out; ", msg)
-	} else if code == 533 {
-		fmt.Println("Failed: unknown cookie; ", msg)
-	} else {
-		panic(msg)
-	}
+	// if code == 231 {
+	// 	fmt.Println("Success: ", msg)
+	// 	return msg, nil
+	// } else if code == 430 {
+	// 	fmt.Println("Failed: logged out; ", msg)
+	// } else if code == 533 {
+	// 	fmt.Println("Failed: unknown cookie; ", msg)
+	// } else {
+	// 	return "", &textproto.Error{code, msg}
+	// }
 
-	return msg, nil
+	return Response{code, msg}, nil
 }
 
 // cmd is a convenience function that sends a command and returns the response
