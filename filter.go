@@ -10,7 +10,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-type Filter struct {
+// A Client represents a client connection to a CoSign daemon.
+type Client struct {
 	// text is the textproto.Conn used by clients
 	text *textproto.Conn
 
@@ -21,14 +22,20 @@ type Filter struct {
 	config *Config // configuration passed to constructor
 }
 
+// A Config structure is used to configure a CoSign client.
+// After one has been passed to a gosign function it must not be
+// modified. A Config may be reused; the gosign package will also not
+// modify it.
 type Config struct {
 	Address   string
 	Service   string
 	TLSConfig *tls.Config
 }
 
-func Dial(conf *Config) (*Filter, error) {
-	f := &Filter{config: conf}
+// Dial returns a new Client connected to a daemon at addr.
+// The addr must include a port, as in "weblogin.inf.ed.ac.uk:6663"
+func Dial(conf *Config) (*Client, error) {
+	f := &Client{config: conf}
 
 	err := f.dial()
 	if err != nil {
@@ -39,7 +46,7 @@ func Dial(conf *Config) (*Filter, error) {
 }
 
 // Internal dial to connect
-func (f *Filter) dial() (err error) {
+func (f *Client) dial() (err error) {
 	conn, err := net.Dial("tcp", f.config.Address)
 	if err != nil {
 		return
@@ -91,7 +98,7 @@ func (f *Filter) dial() (err error) {
 }
 
 // Quit sends the QUIT command and closes the connection to the server.
-func (f *Filter) Quit() error {
+func (f *Client) Quit() error {
 	_, msg, err := f.cmd(221, "QUIT")
 	if err != nil {
 		return errors.Wrap(err, "QUIT failed")
@@ -104,12 +111,12 @@ func (f *Filter) Quit() error {
 }
 
 // Close closes the connection to the CoSign daemon.
-func (f *Filter) Close() error {
+func (f *Client) Close() error {
 	return f.text.Close()
 }
 
 // Check checks the given login token
-func (f *Filter) Check(loginToken string) (resp Response, err error) {
+func (f *Client) Check(loginToken string) (resp Response, err error) {
 	// Make sure login token is clean
 	if containsWhitespace(loginToken) {
 		err = errors.New("Malformed login token")
@@ -138,7 +145,7 @@ func (f *Filter) Check(loginToken string) (resp Response, err error) {
 }
 
 // cmd is a convenience function that sends a command and returns the response
-func (f *Filter) cmd(expectCode int, format string, args ...interface{}) (int, string, error) {
+func (f *Client) cmd(expectCode int, format string, args ...interface{}) (int, string, error) {
 	id, err := f.text.Cmd(format, args...)
 	if err != nil {
 		return 0, "", err
