@@ -19,6 +19,7 @@ type API struct {
 	Gin    *gin.Engine
 
 	Server *http.Server
+	Tokens map[string]string
 }
 
 // Start binds the API and starts listening.

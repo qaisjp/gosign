@@ -15,6 +15,7 @@ func NewAPI(
 	conf *config.Config,
 	log *logrus.Logger,
 	filter *cosign.Filter,
+	tokens map[string]string,
 ) *base.API {
 
 	router := gin.Default()
@@ -24,13 +25,14 @@ func NewAPI(
 		Log:    log,
 		Filter: filter,
 		Gin:    router,
+		Tokens: tokens,
 	}
 
 	frontend := frontend.Impl{API: a}
 	router.GET("/cosign/valid", frontend.Valid)
 
 	backend := backend.Impl{API: a}
-	router.GET("/check/:username/:value/:login_cookie", backend.Check)
+	router.GET("/check/:token_name/:token_key/:login_cookie", backend.Check)
 
 	return a
 }

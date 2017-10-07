@@ -10,6 +10,8 @@ type Config struct {
 
 	Address  string `default:"0.0.0.0:8080"`
 	Insecure bool   `default:"false"`
+
+	Tokens []Token
 }
 
 // CoSignConfig contains all configuration data for a CoSign connection
@@ -26,4 +28,10 @@ type CoSignConfig struct {
 	// User             string `required:"true"`
 	// Database         string `required:"true"`
 	// Password         string
+}
+
+// Token is an "API" user
+type Token struct {
+	Name string `required:"true"`
+	Key  string `required:"true"`
 }

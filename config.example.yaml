@@ -8,5 +8,10 @@ cosign:
   keyfile: "??.key"
   certfile: "??.crt"
   cafile: "??.crt" # don't forget that this allows multiple certs concatenated into one file
-  insecure: false # this is so you can test before adding the University Root CA
+  insecure: false # this is so you can test before adding the University Root CA (see cafile)
   timeout: 43200 # 12 hours in seconds, how long it takes for a login token to timeout
+
+# cheap implementation, but it works
+tokens:
+  - name: API_USER
+    key: API_KEY

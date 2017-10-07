@@ -34,6 +34,24 @@ func main() {
 		"module": "init",
 	}).Info("Starting up dice-api")
 
+	// Make sure no token has the same name
+	tokens := map[string]string{}
+	for _, token := range cfg.Tokens {
+		// check tok exists
+		_, ok := tokens[token.Name]
+		if ok {
+			logger.WithFields(logrus.Fields{
+				"module": "init",
+				"name":   token.Name,
+			}).Info("multiple tokens exist with the same name")
+
+			return
+		}
+
+		// ok, doesn't exist, append
+		tokens[token.Name] = token.Key
+	}
+
 	// Initialize the cosign filter
 	filter, err := cosign.NewFilter(cfg.CoSign)
 
@@ -55,6 +73,7 @@ func main() {
 		cfg,
 		logger,
 		filter,
+		tokens,
 	)
 
 	go func() {
