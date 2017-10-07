@@ -18,9 +18,11 @@ type CoSignConfig struct {
 	CGIAddress    string `required:"true"`
 	ServerName    string `required:"true"`
 	Service       string `required:"true"`
-	KeyFile       string `required:"true"`
-	CertFile      string `required:"true"`
-	Insecure      bool   `default:"false"`
+
+	Insecure bool   `default:"false"`
+	CAFile   string `required:"true"`
+	KeyFile  string `required:"true"`
+	CertFile string `required:"true"`
 	// User             string `required:"true"`
 	// Database         string `required:"true"`
 	// Password         string

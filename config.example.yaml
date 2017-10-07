@@ -5,7 +5,8 @@ cosign:
   service: "betterinformatics.com"
   daemonaddress: "weblogin.inf.ed.ac.uk:6663"
   cgiaddress: "weblogin.inf.ed.ac.uk"
-  # keyfile: "??bi.key"
-  # certfile: "??bi.crt"
+  keyfile: "??.key"
+  certfile: "??.crt"
+  cafile: "??.crt" # don't forget that this allows multiple certs concatenated into one file
   insecure: false # this is so you can test before adding the University Root CA
   timeout: 43200 # 12 hours in seconds, how long it takes for a login token to timeout

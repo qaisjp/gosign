@@ -3,6 +3,7 @@ package cosign
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"io/ioutil"
 
 	"github.com/compsoc-edinburgh/bi-dice-api/pkg/config"
 	"github.com/pkg/errors"
@@ -15,8 +16,15 @@ func NewFilter(cfg config.CoSignConfig) (*cosign.Filter, error) {
 		return nil, errors.Wrap(err, "could not read certfile+keyfile")
 	}
 
+	// Read CAFile containing multiple certs
+	certs, err := ioutil.ReadFile(cfg.CAFile)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not read CAFile")
+	}
+
+	// Build a cert pool based from the CAFile
 	pool := x509.NewCertPool()
-	// fmt.Println("Append ok? ", pool.AppendCertsFromPEM([]byte(pemCerts)))
+	pool.AppendCertsFromPEM(certs)
 
 	filter, err := cosign.Dial(&cosign.Config{
 		Address: cfg.DaemonAddress,
@@ -25,7 +33,7 @@ func NewFilter(cfg config.CoSignConfig) (*cosign.Filter, error) {
 			InsecureSkipVerify: cfg.Insecure,
 			ServerName:         cfg.ServerName,
 			Certificates:       []tls.Certificate{cert},
-			ClientCAs:          pool,
+			RootCAs:            pool,
 		},
 	})
 	if err != nil {
@@ -34,5 +42,3 @@ func NewFilter(cfg config.CoSignConfig) (*cosign.Filter, error) {
 
 	return filter, nil
 }
-
-// var pemCerts = `content snipped`
