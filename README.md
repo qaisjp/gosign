@@ -1,4 +1,4 @@
-# gosign: CoSign library for Golang
+# gosign: CoSign library for Golang [![Go Report Card](https://goreportcard.com/badge/github.com/qaisjp/gosign)](https://goreportcard.com/report/github.com/qaisjp/gosign)
 
 gosign is an **experimental** library that provides an interface to the CoSign daemon. It works well, but the API might change in the future.
 
