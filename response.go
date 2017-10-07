@@ -1,4 +1,4 @@
-package cosign
+package gosign
 
 type Response struct {
 	Code    int

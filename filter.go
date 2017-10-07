@@ -1,4 +1,4 @@
-package cosign
+package gosign
 
 import (
 	"crypto/tls"
