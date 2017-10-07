@@ -1,6 +1,6 @@
 # gosign: CoSign library for Golang
 
-gosign is a library that provides an interface to the CoSign daemon.
+gosign is an **experimental** library that provides an interface to the CoSign daemon. It works well, but the API might change in the future.
 
 [CoSign](http://weblogin.org) is a "secure single sign-on web authentication system".
 
