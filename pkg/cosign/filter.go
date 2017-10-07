@@ -7,10 +7,10 @@ import (
 
 	"github.com/compsoc-edinburgh/bi-dice-api/pkg/config"
 	"github.com/pkg/errors"
-	cosign "github.com/qaisjp/go-cosign"
+	"github.com/qaisjp/gosign"
 )
 
-func NewFilter(cfg config.CoSignConfig) (*cosign.Filter, error) {
+func NewClient(cfg config.CoSignConfig) (*gosign.Client, error) {
 	cert, err := tls.LoadX509KeyPair(cfg.CertFile, cfg.KeyFile)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not read certfile+keyfile")
@@ -26,7 +26,7 @@ func NewFilter(cfg config.CoSignConfig) (*cosign.Filter, error) {
 	pool := x509.NewCertPool()
 	pool.AppendCertsFromPEM(certs)
 
-	filter, err := cosign.Dial(&cosign.Config{
+	filter, err := gosign.Dial(&gosign.Config{
 		Address: cfg.DaemonAddress,
 		Service: cfg.Service,
 		TLSConfig: &tls.Config{

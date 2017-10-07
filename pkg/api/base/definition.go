@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/compsoc-edinburgh/bi-dice-api/pkg/config"
-	cosign "github.com/qaisjp/go-cosign"
+	"github.com/qaisjp/gosign"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -15,7 +15,7 @@ import (
 type API struct {
 	Config *config.Config
 	Log    *logrus.Logger
-	Filter *cosign.Filter
+	GoSign *gosign.Client
 	Gin    *gin.Engine
 
 	Server *http.Server

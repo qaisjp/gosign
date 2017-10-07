@@ -52,8 +52,8 @@ func main() {
 		tokens[token.Name] = token.Key
 	}
 
-	// Initialize the cosign filter
-	filter, err := cosign.NewFilter(cfg.CoSign)
+	// Initialize the cosign client
+	filter, err := cosign.NewClient(cfg.CoSign)
 
 	if err != nil {
 		logger.WithFields(logrus.Fields{

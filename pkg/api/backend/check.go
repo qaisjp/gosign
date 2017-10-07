@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Valid redirects the user to a thing to do a thing
+// Check does a thing whilsting checking something
 // - success: abuse checks pass, and cosign returns a code + message
 // - failure: cosign died somewhere, or the IP address is flagged for abuse
 func (i *Impl) Check(c *gin.Context) {
@@ -21,7 +21,7 @@ func (i *Impl) Check(c *gin.Context) {
 	}
 
 	cookie := c.Param("login_cookie")
-	response, err := i.Filter.Check(cookie)
+	response, err := i.GoSign.Check(cookie)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{

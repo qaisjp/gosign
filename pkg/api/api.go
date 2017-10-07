@@ -6,7 +6,7 @@ import (
 	"github.com/compsoc-edinburgh/bi-dice-api/pkg/api/frontend"
 	"github.com/compsoc-edinburgh/bi-dice-api/pkg/config"
 	"github.com/gin-gonic/gin"
-	cosign "github.com/qaisjp/go-cosign"
+	"github.com/qaisjp/gosign"
 	"github.com/sirupsen/logrus"
 )
 
@@ -14,7 +14,7 @@ import (
 func NewAPI(
 	conf *config.Config,
 	log *logrus.Logger,
-	filter *cosign.Filter,
+	gosign *gosign.Client,
 	tokens map[string]string,
 ) *base.API {
 
@@ -23,7 +23,7 @@ func NewAPI(
 	a := &base.API{
 		Config: conf,
 		Log:    log,
-		Filter: filter,
+		GoSign: gosign,
 		Gin:    router,
 		Tokens: tokens,
 	}
