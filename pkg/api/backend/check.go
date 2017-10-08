@@ -21,7 +21,7 @@ func (i *Impl) Check(c *gin.Context) {
 	}
 
 	cookie := c.Param("cookie")
-	response, err := i.GoSign.Check(cookie)
+	response, err := i.GoSign.Check(cookie, false)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
