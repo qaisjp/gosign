@@ -119,21 +119,26 @@ func (f *Client) Close() error {
 // cookie presented to the daemon.
 //
 // This is typically used by both the CGI and the filter (service).
-func (f *Client) Check(cookie string) (resp CheckResponse, err error) {
+func (f *Client) Check(cookie string, serviceCookie bool) (resp CheckResponse, err error) {
 	// Make sure login/service cookie is clean
 	if containsWhitespace(cookie) {
 		err = errors.New("Malformed cookie")
 		return
 	}
 
-	code, msg, err := f.cmd(-1, "CHECK cosign-%s=%s", f.config.Service, cookie)
+	prefix := "cosign-"
+	if serviceCookie {
+		prefix = "cosign="
+	}
+
+	code, msg, err := f.cmd(-1, "CHECK %s%s=%s", prefix, f.config.Service, cookie)
 	if err != nil {
 		return
 	}
 
 	// Permitted response codes for CHECK are:
-	// - 231 (for a service_cookie)
-	// - 232 (for a login_cookie)
+	// - 231 (for a login_cookie)
+	// - 232 (for a service_cookie)
 	// NOT: 233 (same method in cosignd, but only responds to REKEY)
 	if code != 231 && code != 232 {
 		// if code == 430 {
@@ -149,9 +154,6 @@ func (f *Client) Check(cookie string) (resp CheckResponse, err error) {
 			Msg:  msg,
 		}
 	}
-
-	// First, we know it's a service_cookie if the code is 231
-	resp.ServiceCookie = code == 231
 
 	// Lets go ahead and split the message by spaces
 	segments := strings.Split(msg, " ")
