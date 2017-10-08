@@ -1,6 +1,9 @@
 package gosign
 
-type Response struct {
-	Code    int
-	Message string
+type CheckResponse struct {
+	ServiceCookie bool
+	IP            string
+	Principal     string // user name
+	Factors       []string
+	Realm         string // first factor
 }

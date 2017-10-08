@@ -115,33 +115,59 @@ func (f *Client) Close() error {
 	return f.text.Close()
 }
 
-// Check checks the given login token
-func (f *Client) Check(loginToken string) (resp Response, err error) {
-	// Make sure login token is clean
-	if containsWhitespace(loginToken) {
-		err = errors.New("Malformed login token")
+// Check allows clients to retrieve information about a user based on the
+// cookie presented to the daemon.
+//
+// This is typically used by both the CGI and the filter (service).
+func (f *Client) Check(cookie string) (resp CheckResponse, err error) {
+	// Make sure login/service cookie is clean
+	if containsWhitespace(cookie) {
+		err = errors.New("Malformed cookie")
 		return
 	}
 
-	code, msg, err := f.cmd(-1, "CHECK cosign-%s=%s", f.config.Service, loginToken)
+	code, msg, err := f.cmd(-1, "CHECK cosign-%s=%s", f.config.Service, cookie)
 	if err != nil {
 		return
 	}
 
-	// fmt.Printf("%s %s", code, msg)
+	// Permitted response codes for CHECK are:
+	// - 231 (for a service_cookie)
+	// - 232 (for a login_cookie)
+	// NOT: 233 (same method in cosignd, but only responds to REKEY)
+	if code != 231 && code != 232 {
+		// if code == 430 {
+		// 	fmt.Println("Failed: logged out; ", msg)
+		// } else if code == 533 {
+		// 	fmt.Println("Failed: unknown cookie; ", msg)
+		// } else {
+		// 	return "", &textproto.Error{code, msg}
+		// }
 
-	// if code == 231 {
-	// 	fmt.Println("Success: ", msg)
-	// 	return msg, nil
-	// } else if code == 430 {
-	// 	fmt.Println("Failed: logged out; ", msg)
-	// } else if code == 533 {
-	// 	fmt.Println("Failed: unknown cookie; ", msg)
-	// } else {
-	// 	return "", &textproto.Error{code, msg}
-	// }
+		return resp, &textproto.Error{
+			Code: code,
+			Msg:  msg,
+		}
+	}
 
-	return Response{code, msg}, nil
+	// First, we know it's a service_cookie if the code is 231
+	resp.ServiceCookie = code == 231
+
+	// Lets go ahead and split the message by spaces
+	segments := strings.Split(msg, " ")
+
+	// Set the IP/Principal to the first/second segment
+	resp.IP = segments[0]
+	resp.Principal = segments[1]
+
+	// Set the factors to the segment list, excluding the first two items
+	resp.Factors = segments[2:]
+
+	// Set the realm to the first factor
+	resp.Realm = resp.Factors[0]
+
+	// That's all folks!
+	return resp, nil
 }
 
 // cmd is a convenience function that sends a command and returns the response
