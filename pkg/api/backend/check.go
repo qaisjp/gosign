@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"net"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -16,6 +17,15 @@ func (i *Impl) Check(c *gin.Context) {
 		c.JSON(http.StatusForbidden, gin.H{
 			"status":  "error",
 			"message": "access denied",
+		})
+		return
+	}
+
+	ip, ok := c.GetQuery("ip")
+	if !ok || net.ParseIP(ip) == nil {
+		c.JSON(http.StatusForbidden, gin.H{
+			"status":  "error",
+			"message": "invalid IP provided",
 		})
 		return
 	}
