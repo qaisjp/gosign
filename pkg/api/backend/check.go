@@ -20,7 +20,7 @@ func (i *Impl) Check(c *gin.Context) {
 		return
 	}
 
-	cookie := c.Param("login_cookie")
+	cookie := c.Param("cookie")
 	response, err := i.GoSign.Check(cookie)
 
 	if err != nil {
@@ -33,7 +33,6 @@ func (i *Impl) Check(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"status":  "success",
-		"code":    response.Code,
-		"message": response.Message,
+		"message": response,
 	})
 }

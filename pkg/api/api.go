@@ -32,7 +32,7 @@ func NewAPI(
 	router.GET("/cosign/valid", frontend.Valid)
 
 	backend := backend.Impl{API: a}
-	router.GET("/check/:token_name/:token_key/:login_cookie", backend.Check)
+	router.GET("/check/:token_name/:token_key/:cookie", backend.Check)
 
 	return a
 }
