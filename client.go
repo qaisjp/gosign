@@ -15,11 +15,8 @@ type Client struct {
 	// text is the textproto.Conn used by clients
 	text *textproto.Conn
 
-	// keep a reference to the connection so it can be used to create a TLS
-	// connection later
-	conn *tls.Conn
-
 	config *Config // configuration passed to constructor
+	closed bool
 }
 
 // A Config structure is used to configure a CoSign client.
@@ -35,7 +32,7 @@ type Config struct {
 // Dial returns a new Client connected to a daemon at addr.
 // The addr must include a port, as in "weblogin.inf.ed.ac.uk:6663"
 func Dial(conf *Config) (*Client, error) {
-	f := &Client{config: conf}
+	f := &Client{config: conf, closed: true}
 
 	err := f.dial()
 	if err != nil {
@@ -56,6 +53,7 @@ func (f *Client) dial() (err error) {
 	_, message, err := f.text.ReadResponse(220)
 	if err != nil {
 		f.text.Close()
+		return
 	}
 
 	// Make sure this is PROTOCOL v2
@@ -70,8 +68,8 @@ func (f *Client) dial() (err error) {
 		return err
 	}
 
-	f.conn = tls.Client(conn, f.config.TLSConfig)
-	f.text = textproto.NewConn(f.conn)
+	tlsConn := tls.Client(conn, f.config.TLSConfig)
+	f.text = textproto.NewConn(tlsConn)
 
 	code, message, err := f.text.ReadResponse(220)
 	if err != nil {
@@ -94,11 +92,18 @@ func (f *Client) dial() (err error) {
 		return errors.Wrap(err, "noop was unsuccessful")
 	}
 
+	f.closed = false
+
 	return nil
 }
 
 // Quit sends the QUIT command and closes the connection to the server.
+// If the connection is already closed, this returns nil.
 func (f *Client) Quit() error {
+	if f.closed {
+		return nil
+	}
+
 	_, msg, err := f.cmd(221, "QUIT")
 	if err != nil {
 		return errors.Wrap(err, "QUIT failed")
@@ -112,6 +117,10 @@ func (f *Client) Quit() error {
 
 // Close closes the connection to the CoSign daemon.
 func (f *Client) Close() error {
+	if f.closed {
+		return errors.New("connection already closed")
+	}
+	f.closed = true
 	return f.text.Close()
 }
 
@@ -133,7 +142,22 @@ func (f *Client) Check(cookie string, serviceCookie bool) (resp CheckResponse, e
 
 	code, msg, err := f.cmd(-1, "CHECK %s%s=%s", prefix, f.config.Service, cookie)
 	if err != nil {
-		return
+		if !f.closed {
+			err := f.Close()
+			if err != nil {
+				return resp, errors.Wrap(err, "initial close failed before attempting to reconnect")
+			}
+		}
+
+		err = f.dial()
+		if err != nil {
+			return resp, errors.Wrap(err, "failed to reconnect")
+		}
+
+		code, msg, err = f.cmd(-1, "CHECK %s%s=%s", prefix, f.config.Service, cookie)
+		if err != nil {
+			return resp, errors.Wrap(err, "cmd failed even after reconnect")
+		}
 	}
 
 	// Permitted response codes for CHECK are:
