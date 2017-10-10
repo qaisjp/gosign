@@ -15,7 +15,7 @@ func (i *Impl) Valid(c *gin.Context) {
 	key := "cosign-" + i.Config.CoSign.Service
 	loginCookie, exists := c.GetQuery(key)
 	if !exists {
-		fmt.Println(":(")
+		fmt.Println("Redirecting because of a missing cookie")
 		c.Redirect(http.StatusPermanentRedirect, "https://"+i.Config.CoSign.CGIAddress+"/cosign/validation_error.html")
 		return
 	}
@@ -27,14 +27,19 @@ func (i *Impl) Valid(c *gin.Context) {
 	redirect := strings.TrimPrefix(c.Request.URL.RawQuery, key+"="+loginCookie+"&")
 	_, err := url.ParseRequestURI(redirect)
 	if err != nil {
+		fmt.Println("Redirecting because of a bad URI parse; ", err.Error())
 		c.Redirect(http.StatusPermanentRedirect, "https://"+i.Config.CoSign.CGIAddress+"/cosign/validation_error.html")
 		return
 	}
 
-	host, _, err := net.SplitHostPort(c.Request.Host)
-	if err != nil {
-		c.Redirect(http.StatusPermanentRedirect, "https://"+i.Config.CoSign.CGIAddress+"/cosign/validation_error.html")
-		return
+	host := c.Request.Host
+	if strings.Contains(host, ":") {
+		host, _, err = net.SplitHostPort(c.Request.Host)
+		if err != nil {
+			fmt.Println("Redirected because of a SplitHostPort error")
+			c.Redirect(http.StatusPermanentRedirect, "https://"+i.Config.CoSign.CGIAddress+"/cosign/validation_error.html")
+			return
+		}
 	}
 
 	c.SetCookie(
