@@ -30,7 +30,15 @@ func (i *Impl) Check(c *gin.Context) {
 		return
 	}
 
-	cookie := c.Param("cookie")
+	cookie, ok := c.GetQuery("cookie")
+	if !ok {
+		c.JSON(http.StatusForbidden, gin.H{
+			"status":  "error",
+			"message": "missing cookie",
+		})
+		return
+	}
+
 	response, err := i.GoSign.Check(cookie, false)
 
 	if err != nil {
