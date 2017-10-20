@@ -1,6 +1,6 @@
 package frontend
 
-import "github.com/compsoc-edinburgh/bi-dice-api/pkg/api/base"
+import "github.com/qaisjp/cosign-webapi/pkg/api/base"
 
 // Impl is the implementation of the CoSign module
 type Impl struct {

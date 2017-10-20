@@ -7,9 +7,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/compsoc-edinburgh/bi-dice-api/pkg/api"
-	"github.com/compsoc-edinburgh/bi-dice-api/pkg/config"
-	"github.com/compsoc-edinburgh/bi-dice-api/pkg/cosign"
+	"github.com/qaisjp/cosign-webapi/pkg/api"
+	"github.com/qaisjp/cosign-webapi/pkg/config"
+	"github.com/qaisjp/cosign-webapi/pkg/cosign"
 	"github.com/sirupsen/logrus"
 
 	"github.com/koding/multiconfig"

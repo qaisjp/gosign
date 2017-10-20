@@ -1,11 +1,11 @@
 package api
 
 import (
-	"github.com/compsoc-edinburgh/bi-dice-api/pkg/api/backend"
-	"github.com/compsoc-edinburgh/bi-dice-api/pkg/api/base"
-	"github.com/compsoc-edinburgh/bi-dice-api/pkg/api/frontend"
-	"github.com/compsoc-edinburgh/bi-dice-api/pkg/config"
 	"github.com/gin-gonic/gin"
+	"github.com/qaisjp/cosign-webapi/pkg/api/backend"
+	"github.com/qaisjp/cosign-webapi/pkg/api/base"
+	"github.com/qaisjp/cosign-webapi/pkg/api/frontend"
+	"github.com/qaisjp/cosign-webapi/pkg/config"
 	"github.com/qaisjp/gosign"
 	"github.com/sirupsen/logrus"
 )

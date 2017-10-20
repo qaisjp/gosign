@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/compsoc-edinburgh/bi-dice-api/pkg/config"
+	"github.com/qaisjp/cosign-webapi/pkg/config"
 	"github.com/qaisjp/gosign"
 
 	"github.com/gin-gonic/gin"

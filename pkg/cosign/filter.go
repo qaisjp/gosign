@@ -5,7 +5,7 @@ import (
 	"crypto/x509"
 	"io/ioutil"
 
-	"github.com/compsoc-edinburgh/bi-dice-api/pkg/config"
+	"github.com/qaisjp/cosign-webapi/pkg/config"
 	"github.com/pkg/errors"
 	"github.com/qaisjp/gosign"
 )
