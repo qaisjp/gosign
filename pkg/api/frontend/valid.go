@@ -42,14 +42,15 @@ func (i *Impl) Valid(c *gin.Context) {
 		}
 	}
 
-	c.SetCookie(
-		key, loginCookie, // set key=value
-		43200,              // 12 hour hard timeout period for CoSign
-		"/",                // path
-		host,               // hostname
-		!i.Config.Insecure, // limit to secure webpages?
-		true,               // httpOnly, meaning that client js cannot access the cookie
-	)
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     key,
+		Value:    strings.Replace(url.QueryEscape(loginCookie), "%2B", "+", -1),
+		MaxAge:   43200, // 12 hour hard timeout period for CoSign
+		Path:     "/",
+		Domain:   host,
+		Secure:   !i.Config.Insecure, // limit to secure webpages?
+		HttpOnly: true,               // meaning that client js cannot access the cookie
+	})
 
 	c.Redirect(http.StatusPermanentRedirect, redirect)
 }
