@@ -1,4 +1,4 @@
-address: "betterinformatics.com"
+address: "localhost:8080"
 insecure: false # needed for cookie setting
 
 cosign:
