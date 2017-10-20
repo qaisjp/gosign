@@ -5,8 +5,8 @@ import (
 	"crypto/x509"
 	"io/ioutil"
 
-	"github.com/qaisjp/cosign-webapi/pkg/config"
 	"github.com/pkg/errors"
+	"github.com/qaisjp/cosign-webapi/pkg/config"
 	"github.com/qaisjp/gosign"
 )
 
