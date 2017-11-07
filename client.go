@@ -165,13 +165,12 @@ func (f *Client) Check(cookie string, serviceCookie bool) (resp CheckResponse, e
 	// - 232 (for a service_cookie)
 	// NOT: 233 (same method in cosignd, but only responds to REKEY)
 	if code != 231 && code != 232 {
-		// if code == 430 {
-		// 	fmt.Println("Failed: logged out; ", msg)
-		// } else if code == 533 {
-		// 	fmt.Println("Failed: unknown cookie; ", msg)
-		// } else {
-		// 	return "", &textproto.Error{code, msg}
-		// }
+		if (code == 430) && (msg == "CHECK: Already logged out") {
+			// CoSign bug: 430 is returned for another error as well
+			return resp, ErrLoggedOut
+		} else if code == 431 {
+			return resp, ErrLoggedOut
+		}
 
 		return resp, &textproto.Error{
 			Code: code,
