@@ -187,10 +187,22 @@ func (f *Client) Check(cookie string, serviceCookie bool) (resp CheckResponse, e
 	resp.Principal = segments[1]
 
 	// Set the factors to the segment list, excluding the first two items
-	resp.Factors = segments[2:]
+	factors := segments[2:]
 
 	// Set the realm to the first factor
-	resp.Realm = resp.Factors[0]
+	resp.Realm = factors[0]
+
+	// Sometimes `factors` will have a trailing empty string.
+	// Lets deal with that.
+	//
+	// TODO: Investigate this. Do all messages have a trailing space?
+	//		 Is this being picked up by the string split?
+	if factors[len(factors)-1] == "" {
+		factors = factors[:len(factors)-1]
+	}
+
+	// Actually set the response factors to our factors
+	resp.Factors = factors
 
 	// That's all folks!
 	return resp, nil
