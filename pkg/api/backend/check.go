@@ -14,7 +14,7 @@ func (i *Impl) Check(c *gin.Context) {
 	tokenName := c.Param("token_name")
 	tokenKey := c.Param("token_key")
 	if key, ok := i.Tokens[tokenName]; !ok || key != tokenKey {
-		c.JSON(http.StatusForbidden, gin.H{
+		c.JSON(http.StatusUnauthorized, gin.H{
 			"status":  "error",
 			"message": "access denied",
 		})
@@ -32,7 +32,7 @@ func (i *Impl) Check(c *gin.Context) {
 
 	cookie, ok := c.GetQuery("cookie")
 	if !ok {
-		c.JSON(http.StatusForbidden, gin.H{
+		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
 			"message": "missing cookie",
 		})
