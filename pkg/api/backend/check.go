@@ -4,6 +4,8 @@ import (
 	"net"
 	"net/http"
 
+	"github.com/qaisjp/gosign"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -40,6 +42,13 @@ func (i *Impl) Check(c *gin.Context) {
 	}
 
 	response, err := i.GoSign.Check(cookie, false)
+
+	if err == gosign.ErrLoggedOut {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"status":  "error",
+			"message": "not logged in due to various reasons",
+		})
+	}
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
