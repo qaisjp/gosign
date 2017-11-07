@@ -23,7 +23,7 @@ func (i *Impl) Check(c *gin.Context) {
 
 	ip, ok := c.GetQuery("ip")
 	if !ok || net.ParseIP(ip) == nil {
-		c.JSON(http.StatusForbidden, gin.H{
+		c.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
 			"message": "invalid IP provided",
 		})
