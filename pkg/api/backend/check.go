@@ -50,7 +50,7 @@ func (i *Impl) Check(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"status":  "success",
-		"message": response,
+		"status": "success",
+		"data":   response,
 	})
 }
