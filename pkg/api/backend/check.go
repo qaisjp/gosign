@@ -48,6 +48,7 @@ func (i *Impl) Check(c *gin.Context) {
 			"status":  "error",
 			"message": "not logged in due to various reasons",
 		})
+		return
 	}
 
 	if err != nil {
