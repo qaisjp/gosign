@@ -64,17 +64,17 @@ you can then verify the logged in state of the cookie and retrieve information a
 ```go
 response, err := client.Check(cookie, false)
 
-# The only gosign related error is ErrLoggedOut.
+// The only gosign related error is ErrLoggedOut.
 if err == gosign.ErrLoggedOut {
   panic("not logged in due to various reasons")
 }
 
-# There could be some other error, like a network issue.
+// There could be some other error, like a network issue.
 if err != nil {
   panic(err.Error())
 }
 
-# Success! Print out the response.
+// Success! Print out the response.
 fmt.Println(response)
 ```
 
