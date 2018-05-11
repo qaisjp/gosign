@@ -35,7 +35,7 @@ client, err := gosign.Dial(&gosign.Config{
 
 You can get `cert` for `Certificates` by doing the following:
 
-```
+```go
 cert, err := tls.LoadX509KeyPair("service.crt", "service.key")
 if err != nil {
   panic("could not read certfile+keyfile")
@@ -44,7 +44,7 @@ if err != nil {
 
 You can get `pool` for `RootCAs` by doing the following:
 
-```
+```go
 // Read CAFile containing multiple certs
 certs, err := ioutil.ReadFile("cosign.CA.crt")
 if err != nil {
@@ -61,7 +61,7 @@ pool.AppendCertsFromPEM(certs)
 Once you have retrieved a `cosign-service.com` (e.g `cosign-betterinformatics.com`) cookie from a (web) client,
 you can then verify the logged in state of the cookie and retrieve information about that user.
 
-```
+```go
 response, err := client.Check(cookie, false)
 
 # The only gosign related error is ErrLoggedOut.
