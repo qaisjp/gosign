@@ -12,7 +12,7 @@ import (
 
 // A Client represents a client connection to a collection of CoSign daemons.
 type Client struct {
-	conn *conn
+	daemon *daemon
 
 	config *Config // configuration passed to constructor
 }
@@ -37,7 +37,7 @@ func Dial(conf *Config) (*Client, error) {
 		return nil, err
 	}
 
-	f.conn = c
+	f.daemon = c
 
 	return f, nil
 }
@@ -45,12 +45,12 @@ func Dial(conf *Config) (*Client, error) {
 // Quit sends the QUIT command to all servers and closes the connections.
 // If all connections are already closed, this returns nil.
 func (f *Client) Quit() error {
-	return f.conn.quit()
+	return f.daemon.quit()
 }
 
 // Close closes the connection to the CoSign daemon.
 func (f *Client) Close() error {
-	return f.conn.close()
+	return f.daemon.close()
 }
 
 // Check allows clients to retrieve information about a user based on the
@@ -74,25 +74,25 @@ func (f *Client) Check(cookie string, serviceCookie bool) (resp CheckResponse, e
 	var msg string
 
 	{
-		conn := f.conn
+		daemon := f.daemon
 		var code int
 
-		code, msg, err = conn.cmd(-1, cmd)
+		code, msg, err = daemon.cmd(-1, cmd)
 		if err != nil {
-			if !conn.closed {
+			if !daemon.closed {
 				err := f.Close()
 				if err != nil {
 					return resp, errors.Wrap(err, "initial close failed before attempting to reconnect")
 				}
 			}
 
-			conn, err = dialConn(f.config)
-			f.conn = conn // todo: update index
+			daemon, err = dialConn(f.config)
+			f.daemon = daemon // todo: update index
 			if err != nil {
 				return resp, errors.Wrap(err, "failed to reconnect")
 			}
 
-			code, msg, err = conn.cmd(-1, cmd)
+			code, msg, err = daemon.cmd(-1, cmd)
 			if err != nil {
 				return resp, errors.Wrap(err, "cmd failed even after reconnect")
 			}

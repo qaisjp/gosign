@@ -9,8 +9,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-// A conn represents an internal connection to a single CoSign daemon
-type conn struct {
+// A daemon represents an internal connection to a single CoSign daemon
+type daemon struct {
 	// text is the textproto.Conn used by clients
 	text *textproto.Conn
 
@@ -18,18 +18,18 @@ type conn struct {
 }
 
 // Internal dial to connect
-func dialConn(config *Config) (f *conn, err error) {
-	f = &conn{closed: true}
+func dialConn(config *Config) (d *daemon, err error) {
+	d = &daemon{closed: true}
 
 	conn, err := net.Dial("tcp", config.Address)
 	if err != nil {
 		return
 	}
 
-	f.text = textproto.NewConn(conn)
-	_, message, err := f.text.ReadResponse(220)
+	d.text = textproto.NewConn(conn)
+	_, message, err := d.text.ReadResponse(220)
 	if err != nil {
-		f.text.Close()
+		d.text.Close()
 		return
 	}
 
@@ -40,17 +40,17 @@ func dialConn(config *Config) (f *conn, err error) {
 		return nil, errors.Errorf("daemon supplied unknown welcome message: %s", message)
 	}
 
-	_, _, err = f.cmd(220, "STARTTLS 2")
+	_, _, err = d.cmd(220, "STARTTLS 2")
 	if err != nil {
 		return nil, err
 	}
 
 	tlsConn := tls.Client(conn, config.TLSConfig)
-	f.text = textproto.NewConn(tlsConn)
+	d.text = textproto.NewConn(tlsConn)
 
-	code, message, err := f.text.ReadResponse(220)
+	code, message, err := d.text.ReadResponse(220)
 	if err != nil {
-		f.text.Close()
+		d.text.Close()
 		return nil, errors.Wrapf(err, "expected code 200, got %d %s", code, message)
 	}
 
@@ -58,30 +58,30 @@ func dialConn(config *Config) (f *conn, err error) {
 		rerr := recover()
 		if rerr != nil {
 			err = errors.Wrapf(rerr.(error), "noop was unsuccessful... did you provide the right key/crt?")
-			f.text.Close()
+			d.text.Close()
 		}
 	}()
 
 	// Make sure the NOOP works
-	_, _, err = f.cmd(250, "NOOP")
+	_, _, err = d.cmd(250, "NOOP")
 	if err != nil {
-		f.text.Close()
+		d.text.Close()
 		return nil, errors.Wrap(err, "noop was unsuccessful")
 	}
 
-	f.closed = false
+	d.closed = false
 
-	return f, nil
+	return d, nil
 }
 
 // quit sends the QUIT command and closes the connection to the daemon.
 // If the connection is already closed, this returns nil.
-func (f *conn) quit() error {
-	if f.closed {
+func (d *daemon) quit() error {
+	if d.closed {
 		return nil
 	}
 
-	_, msg, err := f.cmd(221, "QUIT")
+	_, msg, err := d.cmd(221, "QUIT")
 	if err != nil {
 		return errors.Wrap(err, "QUIT failed")
 	}
@@ -89,26 +89,26 @@ func (f *conn) quit() error {
 	if msg != "Service closing transmission channel" {
 		return errors.Errorf("unexpected response: %s", msg)
 	}
-	return f.text.Close()
+	return d.text.Close()
 }
 
 // close closes the connection to the daemon.
-func (f *conn) close() error {
-	if f.closed {
-		return errors.New("connection already closed")
+func (d *daemon) close() error {
+	if d.closed {
+		return errors.New("connection to daemon already closed")
 	}
-	f.closed = true
-	return f.text.Close()
+	d.closed = true
+	return d.text.Close()
 }
 
 // cmd is a convenience function that sends a command and returns the response
-func (f *conn) cmd(expectCode int, format string, args ...interface{}) (int, string, error) {
-	id, err := f.text.Cmd(format, args...)
+func (d *daemon) cmd(expectCode int, format string, args ...interface{}) (int, string, error) {
+	id, err := d.text.Cmd(format, args...)
 	if err != nil {
 		return 0, "", err
 	}
-	f.text.StartResponse(id)
-	defer f.text.EndResponse(id)
-	code, msg, err := f.text.ReadResponse(expectCode)
+	d.text.StartResponse(id)
+	defer d.text.EndResponse(id)
+	code, msg, err := d.text.ReadResponse(expectCode)
 	return code, msg, err
 }
