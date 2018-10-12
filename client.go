@@ -34,7 +34,13 @@ type Config struct {
 func Dial(conf *Config) (*Client, error) {
 	f := &Client{config: conf}
 
-	c, err := dialDaemon(net.JoinHostPort(conf.Host, conf.Port), conf)
+	addresses, err := net.LookupHost(conf.Host)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not lookup host for addresses")
+	}
+
+	// Dial a daemon to one of the addresses (leave randomness to LookupHost)
+	c, err := dialDaemon(net.JoinHostPort(addresses[0], conf.Port), conf)
 	if err != nil {
 		return nil, err
 	}
