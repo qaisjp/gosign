@@ -32,7 +32,7 @@ type Config struct {
 func Dial(conf *Config) (*Client, error) {
 	f := &Client{config: conf}
 
-	c, err := dialDaemon(conf)
+	c, err := dialDaemon(conf.Address, conf)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func (f *Client) Check(cookie string, serviceCookie bool) (resp CheckResponse, e
 				}
 			}
 
-			daemon, err = dialDaemon(f.config)
+			daemon, err = dialDaemon(daemon.address, f.config)
 			f.daemon = daemon // todo: update index
 			if err != nil {
 				return resp, errors.Wrap(err, "failed to reconnect")

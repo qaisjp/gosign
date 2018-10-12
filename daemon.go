@@ -14,14 +14,15 @@ type daemon struct {
 	// text is the textproto.Conn used by clients
 	text *textproto.Conn
 
-	closed bool
+	closed  bool
+	address string
 }
 
 // Internal dial to connect
-func dialDaemon(config *Config) (d *daemon, err error) {
-	d = &daemon{closed: true}
+func dialDaemon(address string, config *Config) (d *daemon, err error) {
+	d = &daemon{closed: true, address: address}
 
-	conn, err := net.Dial("tcp", config.Address)
+	conn, err := net.Dial("tcp", address)
 	if err != nil {
 		return
 	}
