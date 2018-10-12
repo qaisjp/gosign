@@ -136,8 +136,13 @@ func (f *Client) Check(cookie string, serviceCookie bool) (resp CheckResponse, e
 			}
 
 			// If code is 533 then "cookie not in db" and we need to try another daemon
-			if code == 533 {
-				// try another daemon
+			// The same thing for 534 (for service cookies)
+			if code == 533 || code == 534 {
+				// CoSign bug:
+				// 	- 534 is incorrectly returned for login cookies if they are invalid
+				//	- 534 is usually returned if the service cookie does not exist
+
+				// try another daemon!
 				continue
 			}
 
