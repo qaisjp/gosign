@@ -8,12 +8,13 @@ import (
 	"strings"
 	"unicode"
 
+	multierror "github.com/hashicorp/go-multierror"
 	"github.com/pkg/errors"
 )
 
 // A Client represents a client connection to a collection of CoSign daemons.
 type Client struct {
-	daemon *daemon
+	daemon []*daemon
 
 	config *Config // configuration passed to constructor
 }
@@ -32,33 +33,47 @@ type Config struct {
 // Dial returns a new Client connected to all daemons at addr.
 // The addr must include a port, as in "weblogin.inf.ed.ac.uk:6663"
 func Dial(conf *Config) (*Client, error) {
-	f := &Client{config: conf}
+	f := &Client{
+		daemon: make([]*daemon, 0),
+		config: conf,
+	}
 
 	addresses, err := net.LookupHost(conf.Host)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not lookup host for addresses")
 	}
 
-	// Dial a daemon to one of the addresses (leave randomness to LookupHost)
-	c, err := dialDaemon(net.JoinHostPort(addresses[0], conf.Port), conf)
-	if err != nil {
-		return nil, err
-	}
+	for _, addr := range addresses {
+		// Dial a daemon to one of the addresses (leave randomness to LookupHost)
+		d, err := dialDaemon(net.JoinHostPort(addr, conf.Port), conf)
 
-	f.daemon = c
+		// If we run into an error dialing any of the addresses, return that error
+		// and return any errors from the cleanup (from f.Close)
+		if err != nil {
+			return nil, multierror.Append(err, f.Close())
+		}
+
+		f.daemon = append(f.daemon, d)
+	}
 
 	return f, nil
 }
 
 // Quit sends the QUIT command to all servers and closes the connections.
 // If all connections are already closed, this returns nil.
-func (f *Client) Quit() error {
-	return f.daemon.quit()
+func (f *Client) Quit() (err error) {
+	for _, d := range f.daemon {
+		multierror.Append(err, d.quit())
+	}
+	return err
 }
 
 // Close closes the connection to the CoSign daemon.
-func (f *Client) Close() error {
-	return f.daemon.close()
+func (f *Client) Close() (err error) {
+	for _, d := range f.daemon {
+		multierror.Append(err, d.close())
+	}
+	return err
 }
 
 // Check allows clients to retrieve information about a user based on the
@@ -79,12 +94,11 @@ func (f *Client) Check(cookie string, serviceCookie bool) (resp CheckResponse, e
 
 	cmd := fmt.Sprintf("CHECK %s%s=%s", prefix, f.config.Service, cookie)
 
-	var msg string
+	// Code and messgae from executing the command
+	code := -1
+	msg := ""
 
-	{
-		daemon := f.daemon
-		var code int
-
+	for i, daemon := range f.daemon {
 		code, msg, err = daemon.cmd(-1, cmd)
 		if err != nil {
 			if !daemon.closed {
@@ -95,7 +109,7 @@ func (f *Client) Check(cookie string, serviceCookie bool) (resp CheckResponse, e
 			}
 
 			daemon, err = dialDaemon(daemon.address, f.config)
-			f.daemon = daemon // todo: update index
+			f.daemon[i] = daemon
 			if err != nil {
 				return resp, errors.Wrap(err, "failed to reconnect")
 			}
@@ -121,7 +135,7 @@ func (f *Client) Check(cookie string, serviceCookie bool) (resp CheckResponse, e
 			// If code is 533 then "cookie not in db" and we need to try another daemon
 			if code == 533 {
 				// try another daemon
-				// continue
+				continue
 			}
 
 			return resp, &textproto.Error{
@@ -129,6 +143,8 @@ func (f *Client) Check(cookie string, serviceCookie bool) (resp CheckResponse, e
 				Msg:  msg,
 			}
 		}
+
+		break
 	}
 
 	// Lets go ahead and split the message by spaces
