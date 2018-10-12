@@ -18,7 +18,7 @@ type daemon struct {
 }
 
 // Internal dial to connect
-func dialConn(config *Config) (d *daemon, err error) {
+func dialDaemon(config *Config) (d *daemon, err error) {
 	d = &daemon{closed: true}
 
 	conn, err := net.Dial("tcp", config.Address)
