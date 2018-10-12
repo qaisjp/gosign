@@ -27,7 +27,8 @@ func NewClient(cfg config.CoSignConfig) (*gosign.Client, error) {
 	pool.AppendCertsFromPEM(certs)
 
 	filter, err := gosign.Dial(&gosign.Config{
-		Address: cfg.DaemonAddress,
+		Host:    cfg.DaemonHost,
+		Port:    cfg.DaemonPort,
 		Service: cfg.Service,
 		TLSConfig: &tls.Config{
 			InsecureSkipVerify: cfg.Insecure,

@@ -16,10 +16,11 @@ type Config struct {
 
 // CoSignConfig contains all configuration data for a CoSign connection
 type CoSignConfig struct {
-	DaemonAddress string `required:"true"`
-	CGIAddress    string `required:"true"`
-	ServerName    string `required:"true"`
-	Service       string `required:"true"`
+	DaemonHost string `required:"true"`
+	DaemonPort string `default:"6663"`
+	CGIAddress string `required:"true"`
+	ServerName string `required:"true"`
+	Service    string `required:"true"`
 
 	Insecure bool   `default:"false"`
 	CAFile   string `required:"true"`

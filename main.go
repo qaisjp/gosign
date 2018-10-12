@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"net"
 	"os"
 	"os/signal"
 	"syscall"
@@ -55,18 +56,20 @@ func main() {
 	// Initialize the cosign client
 	filter, err := cosign.NewClient(cfg.CoSign)
 
+	addr := net.JoinHostPort(cfg.CoSign.DaemonHost, cfg.CoSign.DaemonPort)
+
 	if err != nil {
 		logger.WithFields(logrus.Fields{
 			"module": "init",
 			"error":  err.Error(),
-			"addr":   cfg.CoSign.DaemonAddress,
+			"addr":   addr,
 		}).Fatal("Unable to connect to the CoSign daemon")
 		return
 	}
 
 	logger.WithFields(logrus.Fields{
 		"module": "init",
-		"addr":   cfg.CoSign.DaemonAddress,
+		"addr":   addr,
 	}).Info("Connected to the CoSign daemon")
 
 	api := api.NewAPI(
