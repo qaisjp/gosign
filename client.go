@@ -3,6 +3,7 @@ package gosign
 import (
 	"crypto/tls"
 	"fmt"
+	"math/rand"
 	"net"
 	"net/textproto"
 	"strings"
@@ -98,7 +99,9 @@ func (f *Client) Check(cookie string, serviceCookie bool) (resp CheckResponse, e
 	code := -1
 	msg := ""
 
-	for i, daemon := range f.daemon {
+	for _, i := range rand.Perm(len(f.daemon)) {
+		daemon := f.daemon[i]
+
 		code, msg, err = daemon.cmd(-1, cmd)
 		if err != nil {
 			if !daemon.closed {
