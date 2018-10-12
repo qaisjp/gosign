@@ -3,6 +3,7 @@ package gosign
 import (
 	"crypto/tls"
 	"fmt"
+	"net"
 	"net/textproto"
 	"strings"
 	"unicode"
@@ -22,7 +23,8 @@ type Client struct {
 // modified. A Config may be reused; the gosign package will also not
 // modify it.
 type Config struct {
-	Address   string
+	Host      string
+	Port      string
 	Service   string
 	TLSConfig *tls.Config
 }
@@ -32,7 +34,7 @@ type Config struct {
 func Dial(conf *Config) (*Client, error) {
 	f := &Client{config: conf}
 
-	c, err := dialDaemon(conf.Address, conf)
+	c, err := dialDaemon(net.JoinHostPort(conf.Host, conf.Port), conf)
 	if err != nil {
 		return nil, err
 	}
