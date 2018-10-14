@@ -77,6 +77,10 @@ func (f *Client) Close() (err error) {
 	return err
 }
 
+func isMissingCookieError(code int) bool {
+	return code == 533 || code == 534
+}
+
 // Check allows clients to retrieve information about a user based on the
 // cookie presented to the daemon.
 //
@@ -137,7 +141,7 @@ func (f *Client) Check(cookie string, serviceCookie bool) (resp CheckResponse, e
 
 			// If code is 533 then "cookie not in db" and we need to try another daemon
 			// The same thing for 534 (for service cookies)
-			if code == 533 || code == 534 {
+			if isMissingCookieError(code) {
 				// CoSign bug:
 				// 	- 534 is incorrectly returned for login cookies if they are invalid
 				//	- 534 is usually returned if the service cookie does not exist
@@ -153,6 +157,13 @@ func (f *Client) Check(cookie string, serviceCookie bool) (resp CheckResponse, e
 		}
 
 		break
+	}
+
+	if isMissingCookieError(code) {
+		return resp, &textproto.Error{
+			Code: code,
+			Msg:  msg,
+		}
 	}
 
 	// Lets go ahead and split the message by spaces
