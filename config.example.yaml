@@ -3,7 +3,8 @@ insecure: false # needed for cookie setting
 
 cosign:
   service: "betterinformatics.com"
-  daemonaddress: "weblogin.inf.ed.ac.uk:6663"
+  daemonhost: "weblogin.inf.ed.ac.uk"
+  daemonport: "6663"
   cgiaddress: "weblogin.inf.ed.ac.uk"
   keyfile: "??.key"
   certfile: "??.crt"
