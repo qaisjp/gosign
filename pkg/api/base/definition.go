@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/qaisjp/cosign-webapi/pkg/config"
 	"github.com/qaisjp/gosign"
+	"github.com/qaisjp/gosign/internal/config"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"

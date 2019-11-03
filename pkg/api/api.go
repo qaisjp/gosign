@@ -2,10 +2,10 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/qaisjp/cosign-webapi/pkg/api/backend"
-	"github.com/qaisjp/cosign-webapi/pkg/api/base"
-	"github.com/qaisjp/cosign-webapi/pkg/api/frontend"
-	"github.com/qaisjp/cosign-webapi/pkg/config"
+	"github.com/qaisjp/gosign/internal/api/backend"
+	"github.com/qaisjp/gosign/internal/api/base"
+	"github.com/qaisjp/gosign/internal/api/frontend"
+	"github.com/qaisjp/gosign/internal/config"
 	"github.com/qaisjp/gosign"
 	"github.com/sirupsen/logrus"
 )

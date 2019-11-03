@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 
 	"github.com/pkg/errors"
-	"github.com/qaisjp/cosign-webapi/pkg/config"
+	"github.com/qaisjp/gosign/internal/config"
 	"github.com/qaisjp/gosign"
 )
 

@@ -8,9 +8,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/qaisjp/cosign-webapi/pkg/api"
-	"github.com/qaisjp/cosign-webapi/pkg/config"
-	"github.com/qaisjp/cosign-webapi/pkg/cosign"
+	"github.com/qaisjp/gosign/internal/api"
+	"github.com/qaisjp/gosign/internal/config"
+	"github.com/qaisjp/gosign/internal/cosign"
 	"github.com/sirupsen/logrus"
 
 	"github.com/koding/multiconfig"
