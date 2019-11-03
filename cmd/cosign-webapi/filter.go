@@ -1,4 +1,4 @@
-package cosign
+package main
 
 import (
 	"crypto/tls"
@@ -6,11 +6,10 @@ import (
 	"io/ioutil"
 
 	"github.com/pkg/errors"
-	"github.com/qaisjp/gosign/internal/config"
 	"github.com/qaisjp/gosign"
 )
 
-func NewClient(cfg config.CoSignConfig) (*gosign.Client, error) {
+func newGosignClient(cfg CoSignConfig) (*gosign.Client, error) {
 	cert, err := tls.LoadX509KeyPair(cfg.CertFile, cfg.KeyFile)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not read certfile+keyfile")

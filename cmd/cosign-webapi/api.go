@@ -1,11 +1,10 @@
-package base
+package main
 
 import (
 	"context"
 	"net/http"
 
 	"github.com/qaisjp/gosign"
-	"github.com/qaisjp/gosign/internal/config"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -13,7 +12,7 @@ import (
 
 // API contains all the dependencies of the API server
 type API struct {
-	Config *config.Config
+	Config *Config
 	Log    *logrus.Logger
 	GoSign *gosign.Client
 	Gin    *gin.Engine
@@ -38,4 +37,28 @@ func (a *API) Shutdown(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+// NewAPI sets up a new API module.
+func NewAPI(
+	conf *Config,
+	log *logrus.Logger,
+	gosign *gosign.Client,
+	tokens map[string]string,
+) *API {
+
+	router := gin.Default()
+
+	a := &API{
+		Config: conf,
+		Log:    log,
+		GoSign: gosign,
+		Gin:    router,
+		Tokens: tokens,
+	}
+
+	router.GET("/cosign/valid", a.Valid)
+	router.GET("/check/:token_name/:token_key", a.Check)
+
+	return a
 }

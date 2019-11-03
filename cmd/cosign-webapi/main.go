@@ -8,9 +8,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/qaisjp/gosign/internal/api"
-	"github.com/qaisjp/gosign/internal/config"
-	"github.com/qaisjp/gosign/internal/cosign"
 	"github.com/sirupsen/logrus"
 
 	"github.com/koding/multiconfig"
@@ -20,7 +17,7 @@ func main() {
 	var err error
 
 	m := multiconfig.NewWithPath(os.Getenv("config"))
-	cfg := &config.Config{}
+	cfg := &Config{}
 	m.MustLoad(cfg)
 
 	logLevel, err := logrus.ParseLevel(cfg.LogLevel)
@@ -54,7 +51,7 @@ func main() {
 	}
 
 	// Initialize the cosign client
-	filter, err := cosign.NewClient(cfg.CoSign)
+	filter, err := newGosignClient(cfg.CoSign)
 
 	addr := net.JoinHostPort(cfg.CoSign.DaemonHost, cfg.CoSign.DaemonPort)
 
@@ -72,7 +69,7 @@ func main() {
 		"addr":   addr,
 	}).Info("Connected to the CoSign daemon")
 
-	api := api.NewAPI(
+	api := NewAPI(
 		cfg,
 		logger,
 		filter,

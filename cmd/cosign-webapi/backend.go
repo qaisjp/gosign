@@ -1,4 +1,4 @@
-package backend
+package main
 
 import (
 	"net"
@@ -12,7 +12,7 @@ import (
 // Check does a thing whilsting checking something
 // - success: abuse checks pass, and cosign returns a code + message
 // - failure: cosign died somewhere, or the IP address is flagged for abuse
-func (i *Impl) Check(c *gin.Context) {
+func (i *API) Check(c *gin.Context) {
 	tokenName := c.Param("token_name")
 	tokenKey := c.Param("token_key")
 	if key, ok := i.Tokens[tokenName]; !ok || key != tokenKey {

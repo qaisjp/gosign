@@ -1,4 +1,4 @@
-package frontend
+package main
 
 import (
 	"fmt"
@@ -10,8 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Valid redirects the user to a thing to do a thing
-func (i *Impl) Valid(c *gin.Context) {
+// Valid redirects the user to a thing to do a thing - frontend
+func (i *API) Valid(c *gin.Context) {
 	key := "cosign-" + i.Config.CoSign.Service
 	loginCookie, exists := c.GetQuery(key)
 	if !exists {
