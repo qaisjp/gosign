@@ -82,4 +82,4 @@ The response printed out in this example code is just [this CheckResponse struct
 
 ## Projects using gosign
 
-- [cosign-webapi](https://github.com/qaisjp/cosign-webapi/) is a web service that exposes the CHECK command over a REST API to save you from reimplementing CoSign in other languages. It is designed for firewalled access and also authenticates based on defined API keys.
+- [cosign-webapi](https://github.com/qaisjp/gosign/tree/master/cmd/cosign-webapi) is a web service that exposes the CHECK command over a REST API to save you from reimplementing CoSign in other languages. It is designed for firewalled access and also authenticates based on defined API keys.

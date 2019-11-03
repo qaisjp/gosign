@@ -1,11 +1,9 @@
-# cosign-webapi [![Go Report Card](https://goreportcard.com/badge/github.com/qaisjp/cosign-webapi)](https://goreportcard.com/report/github.com/qaisjp/cosign-webapi) [![GoDoc](https://godoc.org/github.com/qaisjp/cosign-webapi?status.svg)](https://godoc.org/github.com/qaisjp/cosign-webapi)
+# cosign-webapi
 
 This is a fully working (albeit not unit tested) webapi to interact with CoSign. This includes access to `Check`
 and also handles the frontend redirections for weblogin callbacks.
 
 This repository uses [gosign](https://github.com/qaisjp/gosign), a library to interact with CoSign daemons.
-
-For more information about Cosign, visit [weblogin.org](http://weblogin.org).
 
 ## What does this do?
 
@@ -38,4 +36,3 @@ For more information about Cosign, visit [weblogin.org](http://weblogin.org).
 2. `/check` only works with a valid API username and API key.
 3. Since the application is only exposed to the world via nginx (as above), we can guarantee
    they only have access to `/cosign/valid` (and not `/check`)
-
