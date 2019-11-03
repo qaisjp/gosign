@@ -1,0 +1,19 @@
+address: "localhost:8080"
+insecure: false # needed for cookie setting
+
+cosign:
+  service: "betterinformatics.com"
+  daemonhost: "weblogin.inf.ed.ac.uk"
+  daemonport: "6663"
+  cgiaddress: "weblogin.inf.ed.ac.uk"
+  keyfile: "??.key"
+  certfile: "??.crt"
+  cafile: "??.crt" # don't forget that this allows multiple certs concatenated into one file
+  servername: "weblogin.inf.ed.ac.uk" # for tls, you need the domain name of the remote cgi server
+  insecure: false # this is so you can test before adding the University Root CA (see cafile)
+  timeout: 43200 # 12 hours in seconds, how long it takes for a login token to timeout
+
+# cheap implementation, but it works
+tokens:
+  - name: API_USER
+    key: API_KEY
